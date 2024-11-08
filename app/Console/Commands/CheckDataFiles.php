@@ -66,6 +66,10 @@ class CheckDataFiles extends Command
                     $product = json_decode($line, true);
                     if (is_array($product)) {
                         $product['imported_t'] = now();
+                        if (isset($product['code'])) {
+                            $product['code'] = preg_replace('/\D/', '', $product['code']);
+                        }
+                        // todo batch insert
                         Product::create($product);
                         $count++;
                     }
@@ -77,6 +81,8 @@ class CheckDataFiles extends Command
         } catch (\Exception $e) {
             DB::rollBack();
             $this->error("Error importing file {$file}: " . $e->getMessage());
+
+
         } finally {
             gzclose($gzStream);
         }
@@ -88,6 +94,7 @@ class CheckDataFiles extends Command
      */
     protected function checkIfFileIsImported(string $file): bool
     {
+        //TODO use hash instead of filename and date to only import if file is changed or new
         $exists = DB::table('data_files')
             ->where('name', $file)
             ->exists();
@@ -102,6 +109,7 @@ class CheckDataFiles extends Command
      */
     protected function markFileAsImported(string $file): void
     {
+
         DB::table('data_files')->insert([
             'name' => $file,
             'last_checked' => now()
