@@ -69,7 +69,6 @@ class CheckDataFiles extends Command
                         if (isset($product['code'])) {
                             $product['code'] = preg_replace('/\D/', '', $product['code']);
                         }
-                        // todo batch insert
                         Product::create($product);
                         $count++;
                     }
